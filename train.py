@@ -16,6 +16,7 @@ def xgboost_make_submission():
     sub_end_date = '2016-04-16'
 
     user_index, training_data, label = make_train_set(train_start_date, train_end_date, test_start_date, test_end_date)
+
     # Cross Validation
     # dataframe.values--no column name
     X_train, X_test, y_train, y_test = train_test_split(training_data.values, label.values, test_size=0.2, random_state=0)
@@ -105,3 +106,4 @@ def xgboost_cv():
 if __name__ == '__main__':
     xgboost_cv()
 #xgboost_make_submission()
+
