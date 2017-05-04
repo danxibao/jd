@@ -127,7 +127,7 @@ def get_action_feat(start_date, end_date):
     return actions
 
 
-def get_accumulate_action_feat(start_date, end_date):
+def get_attenuation_action_feat(start_date, end_date):
     dump_path = './cache/action_accumulate_%s_%s.pkl' % (start_date, end_date)
     if os.path.exists(dump_path):
         actions = pickle.load(open(dump_path))
@@ -233,6 +233,18 @@ def get_labels(start_date, end_date):
         pickle.dump(actions, open(dump_path, 'w'))
     return actions
 
+# generate 时间窗口
+def get_slide_window_action_feat(train_end_date)
+    actions = None
+    for i in (1, 2, 3, 5, 7, 10, 15, 21, 30):
+        start_days = datetime.strptime(train_end_date, '%Y-%m-%d') - timedelta(days=i)
+        start_days = start_days.strftime('%Y-%m-%d')
+        if actions is None:
+            actions = get_action_feat(start_days, train_end_date)
+        else:
+            actions = pd.merge(actions, get_action_feat(start_days, train_end_date), how='left',
+                               on=['user_id', 'sku_id'])
+    return actions
 
 def make_test_set(train_start_date, train_end_date):
     dump_path = './cache/test_set_%s_%s.pkl' % (train_start_date, train_end_date)
@@ -247,17 +259,9 @@ def make_test_set(train_start_date, train_end_date):
         comment_acc = get_comments_product_feat(train_start_date, train_end_date)
         #labels = get_labels(test_start_date, test_end_date)
 
-        # generate 时间窗口
-        # actions = get_accumulate_action_feat(train_start_date, train_end_date)
-        actions = None
-        for i in (1, 2, 3, 5, 7, 10, 15, 21, 30):
-            start_days = datetime.strptime(train_end_date, '%Y-%m-%d') - timedelta(days=i)
-            start_days = start_days.strftime('%Y-%m-%d')
-            if actions is None:
-                actions = get_action_feat(start_days, train_end_date)
-            else:
-                actions = pd.merge(actions, get_action_feat(start_days, train_end_date), how='left',
-                                   on=['user_id', 'sku_id'])
+
+        # actions = get_attenuation_action_feat(train_start_date, train_end_date)
+        actions=get_slide_window_action_feat(train_end_date)
 
         actions = pd.merge(actions, user, how='left', on='user_id')
         actions = pd.merge(actions, user_acc, how='left', on='user_id')
@@ -286,17 +290,8 @@ def make_train_set(train_start_date, train_end_date, test_start_date, test_end_d
         comment_acc = get_comments_product_feat(train_start_date, train_end_date)
         labels = get_labels(test_start_date, test_end_date)
 
-        # generate 时间窗口
-        # actions = get_accumulate_action_feat(train_start_date, train_end_date)
-        actions = None
-        for i in (1, 2, 3, 5, 7, 10, 15, 21, 30):
-            start_days = datetime.strptime(train_end_date, '%Y-%m-%d') - timedelta(days=i)
-            start_days = start_days.strftime('%Y-%m-%d')
-            if actions is None:
-                actions = get_action_feat(start_days, train_end_date)
-            else:
-                actions = pd.merge(actions, get_action_feat(start_days, train_end_date), how='left',
-                                   on=['user_id', 'sku_id'])
+        # actions = get_attenuation_action_feat(train_start_date, train_end_date)
+        actions=get_slide_window_action_feat(train_end_date)
 
         actions = pd.merge(actions, user, how='left', on='user_id')
         actions = pd.merge(actions, user_acc, how='left', on='user_id')
