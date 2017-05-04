@@ -16,6 +16,7 @@ comment_path = "./data/JData_Comment.csv"
 product_path = "./data/JData_Product.csv"
 user_path = "./data/JData_User.csv"
 
+#comment data results per weeks
 comment_date = ["2016-02-01", "2016-02-08", "2016-02-15", "2016-02-22", "2016-02-29", "2016-03-07", "2016-03-14",
                 "2016-03-21", "2016-03-28",
                 "2016-04-04", "2016-04-11", "2016-04-15"]
@@ -40,6 +41,11 @@ def convert_age(age_str):
     else:
         return -1
 
+def DatetimeToInt(x):
+    if isinstance(x,float):
+        return -1
+    return (datetime.strptime("2016-04-20", '%Y-%m-%d') - datetime.strptime(x, '%Y-%m-%d')).days
+
 def get_basic_user_feat():
     dump_path = './cache/basic_user.pkl'
     if os.path.exists(dump_path):
@@ -51,7 +57,10 @@ def get_basic_user_feat():
         age_df = pd.get_dummies(user["age"], prefix="age")
         sex_df = pd.get_dummies(user["sex"], prefix="sex")
         user_lv_df = pd.get_dummies(user["user_lv_cd"], prefix="user_lv_cd")
-        user = pd.concat([user['user_id'], age_df, sex_df, user_lv_df], axis=1)
+        
+        user_reg_tm=user['user_reg_tm'].map(DatetimeToInt)
+        
+        user = pd.concat([user['user_id'], age_df, sex_df, user_lv_df, user_reg_tm], axis=1)
         pickle.dump(user, open(dump_path, 'w'))
     return user
 
@@ -353,12 +362,16 @@ def report(pred, label):
 
 if __name__ == '__main__':
     train_start_date = '2016-02-01'
-    train_end_date = '2016-03-01'
-    test_start_date = '2016-03-01'
-    test_end_date = '2016-03-05'
-    user, action, label = make_train_set(train_start_date, train_end_date, test_start_date, test_end_date)
-    print user.head(10)
-    print action.head(10)
+    train_end_date = '2016-03-05'
+    test_start_date = '2016-03-05'
+    test_end_date = '2016-03-10'
+    
+    #user, action, label = make_train_set(train_start_date, train_end_date, test_start_date, test_end_date)
+    #print user.head(10)
+    #print action.head(10)
+    
+    actions=get_basic_user_feat()
+    print actions
 
 
 
